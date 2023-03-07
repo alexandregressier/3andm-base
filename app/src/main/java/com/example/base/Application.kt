@@ -2,6 +2,7 @@ package com.example.base
 
 import android.util.Log
 import com.amplifyframework.AmplifyException
+import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.core.Amplify
 
 class Application : android.app.Application() {
@@ -10,6 +11,7 @@ class Application : android.app.Application() {
         super.onCreate()
 
         try {
+            Amplify.addPlugin(AWSCognitoAuthPlugin())
             Amplify.configure(applicationContext)
             Log.i("Application", "Initialized Amplify")
         } catch (error: AmplifyException) {
