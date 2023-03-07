@@ -13,11 +13,11 @@
     },
     "categories": {
       "auth": {
-        "wall054d8b42": {
-          "userPoolId": "eu-west-1_FoVGYEuwH",
+        "wallb7128ff5": {
+          "userPoolId": "eu-west-1_Z891foKkA",
           "userPoolName": "prod-wall-Auth",
-          "webClientId": "31s4hs8k512o9baaun8v9g3qhc",
-          "nativeClientId": "31s4hs8k512o9baaun8v9g3qhc"
+          "webClientId": "4fut247vlm5lb04apdm5r2fgue",
+          "nativeClientId": "4fut247vlm5lb04apdm5r2fgue"
         }
       }
     }
