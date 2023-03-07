@@ -17,15 +17,15 @@ fun AuthScreen(
 ) {
     val authState by vm.state.collectAsState()
 
-    var email by remember { mutableStateOf("alex_012@mail.com") }
-    var password by remember { mutableStateOf("P@ssw0rd!") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val signUpError by vm.signUpError.collectAsState()
 
     var verificationCode by remember { mutableStateOf("") }
     val verifyError by vm.verifyError.collectAsState()
 
-    var email2 by remember { mutableStateOf("alex_012@mail.com") }
-    var password2 by remember { mutableStateOf("P@ssw0rd!") }
+    var email2 by remember { mutableStateOf("") }
+    var password2 by remember { mutableStateOf("") }
     val signInError by vm.signInError.collectAsState()
 
     Column(
