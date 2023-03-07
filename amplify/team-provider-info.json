@@ -10,6 +10,16 @@
       "StackName": "amplify-wall-prod-224422",
       "StackId": "arn:aws:cloudformation:eu-west-1:897195863680:stack/amplify-wall-prod-224422/3b82abe0-bd31-11ed-a169-0a49e388ca97",
       "AmplifyAppId": "d3ubo1ldrspxo6"
+    },
+    "categories": {
+      "auth": {
+        "wall054d8b42": {
+          "userPoolId": "eu-west-1_FoVGYEuwH",
+          "userPoolName": "prod-wall-Auth",
+          "webClientId": "31s4hs8k512o9baaun8v9g3qhc",
+          "nativeClientId": "31s4hs8k512o9baaun8v9g3qhc"
+        }
+      }
     }
   }
 }
