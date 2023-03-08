@@ -1,4 +1,4 @@
-package com.example.base.ui.auth
+package com.example.base.ui.state
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -6,20 +6,30 @@ import androidx.lifecycle.viewModelScope
 import com.amplifyframework.auth.AuthChannelEventName
 import com.amplifyframework.auth.AuthException
 import com.amplifyframework.auth.AuthUserAttributeKey
+import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.auth.result.step.AuthSignUpStep
 import com.amplifyframework.core.InitializationStatus
 import com.amplifyframework.hub.HubChannel
 import com.amplifyframework.kotlin.core.Amplify
-import com.example.base.state.AuthState
+import com.example.base.data.remote.HttpClient
+import com.example.base.data.remote.model.Message
+import com.example.base.data.remote.model.MessageInput
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel() : ViewModel() {
+class AppViewModel() : ViewModel() {
 
     companion object {
         private const val TAG = "AuthViewModel"
+        private val BASE_URL = "https://mruiyyiiy0.execute-api.eu-west-1.amazonaws.com"
     }
 
     private val _state = MutableStateFlow(AuthState.Unauthenticated as AuthState)
@@ -34,6 +44,9 @@ class AuthViewModel() : ViewModel() {
     private val _signInError = MutableStateFlow(false)
     val signInError = _signInError.asStateFlow()
 
+    private val _messages = MutableStateFlow(emptyList<Message>())
+    val messages = _messages.asStateFlow()
+
     init {
         viewModelScope.launch {
             try {
@@ -42,7 +55,7 @@ class AuthViewModel() : ViewModel() {
                     _state.value = AuthState.Authenticated(email = fetchEmail())
                 }
             } catch (error: AuthException) {
-                Log.e("AmplifyQuickstart", "Failed to fetch auth session", error)
+                _state.value = AuthState.Unauthenticated
             }
             Amplify.Hub.subscribe(HubChannel.AUTH).collect {
                 when (it.name) {
@@ -73,11 +86,59 @@ class AuthViewModel() : ViewModel() {
                 }
             }
         }
+        viewModelScope.launch {
+            while (true) {
+                fetchMessages()
+                delay(2_000)
+            }
+        }
     }
 
-    private suspend fun fetchEmail(): String {
-        val attributes = Amplify.Auth.fetchUserAttributes()
-        return attributes.first { it.key == AuthUserAttributeKey.email() }.value
+    fun sendMessage(messageContent: String) {
+        viewModelScope.launch {
+            val session = Amplify.Auth.fetchAuthSession() as? AWSCognitoAuthSession
+            val tokens = session?.userPoolTokensResult?.value
+            val accessToken = tokens?.accessToken
+            if (accessToken == null) {
+                Log.e(TAG, "User is not logged in")
+                awaitCancellation()
+            }
+            val response = HttpClient.post("$BASE_URL/messages") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $accessToken")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(MessageInput(content = messageContent))
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val message: Message = response.body()
+                    Log.i(TAG, "Success: $message")
+                }
+                HttpStatusCode.Unauthorized -> {
+                    Log.e(TAG, "Unauthorized: user must be signed in to use this endpoint")
+                }
+                else -> {
+                    Log.e(TAG, "Unexpected error: ${response.bodyAsText()}")
+                }
+            }
+        }
+    }
+
+    suspend fun fetchMessages() {
+        val response = HttpClient.get("$BASE_URL/messages") {
+            contentType(ContentType.Application.Json)
+        }
+        when (response.status) {
+            HttpStatusCode.OK -> {
+                val messages: List<Message> = response.body()
+                _messages.value = messages
+                Log.i(TAG, "Messages fetched successfully: ${messages.map {it.content}}")
+            }
+            else -> {
+                Log.e(TAG, "Unexpected error: ${response.bodyAsText()}")
+            }
+        }
     }
 
     fun signUp(
@@ -164,5 +225,10 @@ class AuthViewModel() : ViewModel() {
     fun resetSignInError() {
         if (_signInError.value)
             _signInError.value = false
+    }
+
+    private suspend fun fetchEmail(): String {
+        val attributes = Amplify.Auth.fetchUserAttributes()
+        return attributes.first { it.key == AuthUserAttributeKey.email() }.value
     }
 }

@@ -1,4 +1,4 @@
-package com.example.base.ui.auth
+package com.example.base.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,25 +8,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.base.state.AuthState
+import com.example.base.ui.state.AppViewModel
+import com.example.base.ui.state.AuthState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AuthScreen(
-    vm: AuthViewModel,
+fun AppScreen(
+    vm: AppViewModel,
 ) {
     val authState by vm.state.collectAsState()
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("alex_012@mail.com") }
+    var password by remember { mutableStateOf("P@ssw0rd!") }
     val signUpError by vm.signUpError.collectAsState()
 
     var verificationCode by remember { mutableStateOf("") }
     val verifyError by vm.verifyError.collectAsState()
 
-    var email2 by remember { mutableStateOf("") }
-    var password2 by remember { mutableStateOf("") }
+    var email2 by remember { mutableStateOf("alex_012@mail.com") }
+    var password2 by remember { mutableStateOf("P@ssw0rd!") }
     val signInError by vm.signInError.collectAsState()
+
+    var message by remember { mutableStateOf("Yo!") }
+    val messages by vm.messages.collectAsState()
 
     Column(
         Modifier
@@ -121,28 +125,41 @@ fun AuthScreen(
                 color = MaterialTheme.colorScheme.error,
             )
         }
-        Button(
-            onClick = {
-                vm.signIn(email2, password2)
-            }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Sign in")
+            Button(
+                onClick = {
+                    vm.signIn(email2, password2)
+                }
+            ) {
+                Text("Sign in")
+            }
+            Button(
+                onClick = {
+                    vm.signOut()
+                }
+            ) {
+                Text("Sign out")
+            }
         }
         Spacer(Modifier.height(8.dp))
 
-        // SIGN OUT ————————————————————————————————————————————————————————————————————————————————
+        // MESSAGES ————————————————————————————————————————————————————————————————————————————————
         Text(
-            "Sign out",
+            "Number of messages: ${messages.size}",
             color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.titleMedium,
+        )
+        TextField(
+            value = message,
+            onValueChange = { message = it },
         )
         Button(
             onClick = {
-                vm.signOut()
+                vm.sendMessage(message)
             }
         ) {
-            Text("Sign out")
+            Text("Send")
         }
-        Spacer(Modifier.height(8.dp))
     }
 }

@@ -3,8 +3,8 @@ package com.example.base
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.base.ui.auth.AuthScreen
-import com.example.base.ui.auth.AuthViewModel
+import com.example.base.ui.screens.AppScreen
+import com.example.base.ui.state.AppViewModel
 import com.example.base.ui.theme.BaseTheme
 
 class MainActivity : ComponentActivity() {
@@ -12,8 +12,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             BaseTheme {
-                AuthScreen(
-                    vm = AuthViewModel(),
+                AppScreen(
+                    vm = AppViewModel(),
                 )
             }
         }

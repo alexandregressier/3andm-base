@@ -1,4 +1,4 @@
-package com.example.base.state
+package com.example.base.ui.state
 
 sealed interface AuthState {
     object Unauthenticated : AuthState
